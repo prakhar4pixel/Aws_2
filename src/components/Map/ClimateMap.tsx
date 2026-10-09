@@ -11,6 +11,7 @@ interface ClimateMapProps {
     drawMode?: "polygon" | "delete" | "simple_select";
     onSelectionChange?: (selection: SelectionInfo) => void;
     onModeChange?: (mode: "polygon" | "delete" | "simple_select") => void;
+    initialCenter?: [number, number] | null;
 }
 
 // MapboxDraw styles using MapLibre GL JS expressions (['get', 'active'])
@@ -99,7 +100,7 @@ const customDrawStyles = [
     }
 ];
 
-export default function ClimateMap({ drawMode = "polygon", onSelectionChange, onModeChange }: ClimateMapProps) {
+export default function ClimateMap({ drawMode = "polygon", onSelectionChange, onModeChange, initialCenter }: ClimateMapProps) {
     const mapContainer = useRef<HTMLDivElement | null>(null);
     const map = useRef<maplibregl.Map | null>(null);
     const drawRef = useRef<MapboxDraw | null>(null);
@@ -130,8 +131,8 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
                     },
                 ],
             },
-            center: [77.2167, 28.6139],
-            zoom: 10,
+            center: initialCenter || [77.2167, 28.6139],
+            zoom: initialCenter ? 12 : 10,
         });
 
         map.current = mapInstance;

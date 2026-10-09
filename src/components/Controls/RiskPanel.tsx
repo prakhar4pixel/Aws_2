@@ -45,6 +45,30 @@ export default function RiskPanel({ riskData, loading }: RiskPanelProps) {
                     <span className="metric-value">{riskData.metrics.builtup_percentage}%</span>
                 </div>
             </div>
+
+            <div className="tree-analysis">
+                <h4><Leaf size={14} /> Canopy Standards (30% Rule)</h4>
+                <div className="tree-analysis-content">
+                    <div className="tree-stats">
+                        <span className="stat-label">Current:</span>
+                        <span className={`stat-value ${riskData.metrics.green_coverage < 30 ? 'text-red' : 'text-green'}`}>
+                            {riskData.metrics.green_coverage}%
+                        </span>
+                    </div>
+                    {riskData.metrics.green_coverage < 30 ? (
+                        <div className="tree-action">
+                            <span className="action-text">Deficit detected. To meet the 30% WHO urban standard in this {riskData.area_hectares} ha area, you need to plant approximately:</span>
+                            <span className="action-number">
+                                {Math.ceil((riskData.area_hectares * ((30 - riskData.metrics.green_coverage) / 100)) * 333).toLocaleString()} trees
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="tree-action success">
+                            <span className="action-text">Excellent! This area meets the 30% urban green canopy standard.</span>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

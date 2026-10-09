@@ -174,3 +174,121 @@
   line-height: 1.5;
   margin: 0;
 }
+
+.search-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.back-btn {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #5c4d3c;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.back-btn:hover {
+  background: rgba(168, 123, 81, 0.1);
+  color: #a87b51;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a87b51;
+}
+
+.city-search-input {
+  width: 100%;
+  padding: 20px 20px 20px 60px;
+  font-size: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(168, 123, 81, 0.3);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  color: #2d241c;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 10px 30px rgba(168, 123, 81, 0.1);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.city-search-input:focus {
+  border-color: #a87b51;
+  box-shadow: 0 15px 40px rgba(168, 123, 81, 0.2);
+  background: rgba(255, 255, 255, 1);
+}
+
+.city-search-input::placeholder {
+  color: #a39486;
+}
+
+.search-spinner {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a87b51;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+.search-results {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 123, 81, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(168, 123, 81, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.search-results li {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  color: #5c4d3c;
+  font-weight: 500;
+}
+
+.search-results li:hover {
+  background: rgba(168, 123, 81, 0.1);
+  color: #2d241c;
+}
+
+.search-results li svg {
+  color: #a87b51;
+}

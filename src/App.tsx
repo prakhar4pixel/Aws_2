@@ -10,6 +10,7 @@ import { calculateClimateRisk } from "./services/api";
 
 function App() {
   const [currentView, setCurrentView] = useState<"landing" | "map">("landing");
+  const [initialCenter, setInitialCenter] = useState<[number, number] | null>(null);
   const [selection, setSelection] = useState<SelectionInfo | null>(null);
   const [drawMode, setDrawMode] = useState<"polygon" | "delete" | "simple_select">("polygon");
   const [riskData, setRiskData] = useState<RiskCalculateResponse | null>(null);
@@ -41,10 +42,12 @@ function App() {
   if (currentView === "landing") {
     return (
       <LandingPage 
-        onChooseMap={() => setCurrentView("map")}
-        onSearchCity={() => {
-          // Future functionality placeholder: could open map focused on a specific city
-          alert("City search functionality is coming soon! Switching to free map mode.");
+        onChooseMap={() => {
+          setInitialCenter(null);
+          setCurrentView("map");
+        }}
+        onSearchCity={(lat, lon) => {
+          setInitialCenter([lon, lat]); // MapLibre takes [lng, lat]
           setCurrentView("map");
         }}
       />
@@ -57,6 +60,7 @@ function App() {
         drawMode={drawMode}
         onSelectionChange={handleSelectionChange} 
         onModeChange={setDrawMode}
+        initialCenter={initialCenter}
       />
       <DrawToolbar 
         activeMode={drawMode}
