@@ -29,21 +29,21 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
             style: {
                 version: 8,
                 sources: {
-                    "osm-tiles": {
+                    "esri-dark": {
                         type: "raster",
-                        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+                        tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"],
                         tileSize: 256,
                         attribution:
-                            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+                            '&copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, HERE, Garmin, © OpenStreetMap contributors, and the GIS User Community',
                     },
                 },
                 layers: [
                     {
-                        id: "osm-tiles-layer",
+                        id: "esri-dark-layer",
                         type: "raster",
-                        source: "osm-tiles",
+                        source: "esri-dark",
                         minzoom: 0,
-                        maxzoom: 19,
+                        maxzoom: 16, // ESRI dark basemap only goes to zoom 16 reliably
                     },
                 ],
             },
