@@ -133,6 +133,8 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
                         if (onModeChange) {
                             onModeChange("polygon");
                         }
+                    } else if (drawMode === "simple_select") {
+                        drawRef.current?.changeMode("simple_select");
                     }
                 }
             } catch (err) {
@@ -140,11 +142,13 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
             }
         };
 
-        // If map is already loaded, update immediately. Otherwise wait for load event.
         if (map.current.loaded()) {
-            updateMode();
+            // Even if map is loaded, MapboxDraw might need a tick to register layers
+            setTimeout(updateMode, 100);
         } else {
-            map.current.once("load", updateMode);
+            map.current.once("load", () => {
+                setTimeout(updateMode, 100);
+            });
         }
     }, [drawMode, onSelectionChange, onModeChange]);
 
