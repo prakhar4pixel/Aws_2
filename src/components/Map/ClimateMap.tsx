@@ -201,22 +201,35 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
 
     // Sync mode changes & toggle drawing cursor class on container
     useEffect(() => {
-        if (!drawRef.current) return;
+        if (!drawRef.current || !map.current) return;
 
-        if (drawMode === "polygon") {
-            drawRef.current.changeMode("draw_polygon");
-            mapContainer.current?.classList.add("drawing-mode");
-        } else {
-            mapContainer.current?.classList.remove("drawing-mode");
-            if (drawMode === "delete") {
-                drawRef.current.deleteAll();
-                if (onSelectionChange) {
-                    onSelectionChange({ geometry: null, areaKm2: 0, areaHectares: 0 });
+        const updateMode = () => {
+            try {
+                if (drawMode === "polygon") {
+                    drawRef.current?.changeMode("draw_polygon");
+                    mapContainer.current?.classList.add("drawing-mode");
+                } else {
+                    mapContainer.current?.classList.remove("drawing-mode");
+                    if (drawMode === "delete") {
+                        drawRef.current?.deleteAll();
+                        if (onSelectionChange) {
+                            onSelectionChange({ geometry: null, areaKm2: 0, areaHectares: 0 });
+                        }
+                        if (onModeChange) {
+                            onModeChange("polygon");
+                        }
+                    }
                 }
-                if (onModeChange) {
-                    onModeChange("polygon");
-                }
+            } catch (err) {
+                console.warn("MapboxDraw mode change delayed:", err);
             }
+        };
+
+        // If map is already loaded, update immediately. Otherwise wait for load event.
+        if (map.current.loaded()) {
+            updateMode();
+        } else {
+            map.current.once("load", updateMode);
         }
     }, [drawMode, onSelectionChange, onModeChange]);
 
