@@ -14,7 +14,60 @@ interface ClimateMapProps {
     initialCenter?: [number, number] | null;
 }
 
-// We are using default MapboxDraw styles.
+// MapboxDraw styles specifically engineered to survive CSS inversion
+// We use #000000 (black) because when the CSS filter inverts it, it becomes #ffffff (bright white)!
+const customDrawStyles = [
+    {
+        id: "gl-draw-polygon-fill",
+        type: "fill",
+        filter: ["all", ["==", "$type", "Polygon"]],
+        paint: {
+            "fill-color": "#000000",
+            "fill-outline-color": "#000000",
+            "fill-opacity": [
+                "case",
+                ["==", ["get", "active"], "true"], 0.4,
+                0.2
+            ]
+        }
+    },
+    {
+        id: "gl-draw-lines",
+        type: "line",
+        filter: ["any", ["==", "$type", "LineString"], ["==", "$type", "Polygon"]],
+        layout: {
+            "line-cap": "round",
+            "line-join": "round"
+        },
+        paint: {
+            "line-color": "#000000",
+            "line-width": 4,
+            "line-dasharray": [
+                "case",
+                ["==", ["get", "active"], "true"], ["literal", [0.2, 2]],
+                ["literal", [1, 0]]
+            ]
+        }
+    },
+    {
+        id: "gl-draw-vertex-outer",
+        type: "circle",
+        filter: ["all", ["==", "$type", "Point"], ["==", "meta", "vertex"], ["!=", "mode", "static"]],
+        paint: {
+            "circle-radius": 7,
+            "circle-color": "#000000" // Inverts to white
+        }
+    },
+    {
+        id: "gl-draw-vertex-inner",
+        type: "circle",
+        filter: ["all", ["==", "$type", "Point"], ["==", "meta", "vertex"], ["!=", "mode", "static"]],
+        paint: {
+            "circle-radius": 5,
+            "circle-color": "#ffffff" // Inverts to black
+        }
+    }
+];
 
 export default function ClimateMap({ drawMode = "polygon", onSelectionChange, onModeChange, initialCenter }: ClimateMapProps) {
     const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -29,21 +82,21 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
             style: {
                 version: 8,
                 sources: {
-                    "esri-dark": {
+                    "osm-tiles": {
                         type: "raster",
-                        tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"],
+                        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
                         tileSize: 256,
                         attribution:
-                            '&copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, HERE, Garmin, © OpenStreetMap contributors, and the GIS User Community',
+                            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
                     },
                 },
                 layers: [
                     {
-                        id: "esri-dark-layer",
+                        id: "osm-tiles-layer",
                         type: "raster",
-                        source: "esri-dark",
+                        source: "osm-tiles",
                         minzoom: 0,
-                        maxzoom: 16, // ESRI dark basemap only goes to zoom 16 reliably
+                        maxzoom: 19,
                     },
                 ],
             },
@@ -70,7 +123,8 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
                 combine_features: false,
                 uncombine_features: false,
             },
-            defaultMode: "draw_polygon"
+            defaultMode: "draw_polygon",
+            styles: customDrawStyles,
         });
 
         mapInstance.addControl(drawControl as unknown as maplibregl.IControl, "top-left");

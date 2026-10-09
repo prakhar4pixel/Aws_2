@@ -19,7 +19,7 @@ html, body, #root, .app {
 }
 
 .climate-map .maplibregl-canvas-container.maplibregl-interactive {
-  /* Removed CSS filter as it was destroying polygon visibility */
+  filter: invert(100%) hue-rotate(180deg) brightness(90%) contrast(95%);
 }
 
 /* Crosshair cursor ONLY active when 'Draw Polygon' button is pressed */
