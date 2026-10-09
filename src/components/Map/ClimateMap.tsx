@@ -14,91 +14,7 @@ interface ClimateMapProps {
     initialCenter?: [number, number] | null;
 }
 
-// MapboxDraw styles using MapLibre GL JS expressions (['get', 'active'])
-const customDrawStyles = [
-    // 1. Polygon Fill — active drawing fill & completed fill
-    {
-        id: "gl-draw-polygon-fill",
-        type: "fill",
-        filter: ["all", ["==", "$type", "Polygon"]],
-        paint: {
-            "fill-color": [
-                "case",
-                ["==", ["get", "active"], "true"], "#10b981",
-                "#059669"
-            ],
-            "fill-outline-color": [
-                "case",
-                ["==", ["get", "active"], "true"], "#10b981",
-                "#059669"
-            ],
-            "fill-opacity": [
-                "case",
-                ["==", ["get", "active"], "true"], 0.35,
-                0.25
-            ]
-        }
-    },
-    // 2. Lines — Polygon outline stroke & LineString while placing points
-    {
-        id: "gl-draw-lines",
-        type: "line",
-        filter: ["any", ["==", "$type", "LineString"], ["==", "$type", "Polygon"]],
-        layout: {
-            "line-cap": "round",
-            "line-join": "round"
-        },
-        paint: {
-            "line-color": [
-                "case",
-                ["==", ["get", "active"], "true"], "#10b981",
-                "#059669"
-            ],
-            "line-width": 3,
-            "line-dasharray": [
-                "case",
-                ["==", ["get", "active"], "true"], ["literal", [0.2, 2]],
-                ["literal", [1, 0]]
-            ]
-        }
-    },
-    // 3. Vertex Points — Outer white glow
-    {
-        id: "gl-draw-vertex-outer",
-        type: "circle",
-        filter: ["all", ["==", "$type", "Point"], ["==", "meta", "vertex"], ["!=", "mode", "static"]],
-        paint: {
-            "circle-radius": 7,
-            "circle-color": "#ffffff"
-        }
-    },
-    // 4. Vertex Points — Inner active/inactive color
-    {
-        id: "gl-draw-vertex-inner",
-        type: "circle",
-        filter: ["all", ["==", "$type", "Point"], ["==", "meta", "vertex"], ["!=", "mode", "static"]],
-        paint: {
-            "circle-radius": 5,
-            "circle-color": [
-                "case",
-                ["==", ["get", "active"], "true"], "#ef4444",
-                "#10b981"
-            ]
-        }
-    },
-    // 5. Midpoint handles
-    {
-        id: "gl-draw-midpoint",
-        type: "circle",
-        filter: ["all", ["==", "$type", "Point"], ["==", "meta", "midpoint"]],
-        paint: {
-            "circle-radius": 4,
-            "circle-color": "#f59e0b",
-            "circle-stroke-width": 1.5,
-            "circle-stroke-color": "#ffffff"
-        }
-    }
-];
+// We are using default MapboxDraw styles.
 
 export default function ClimateMap({ drawMode = "polygon", onSelectionChange, onModeChange, initialCenter }: ClimateMapProps) {
     const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -154,8 +70,7 @@ export default function ClimateMap({ drawMode = "polygon", onSelectionChange, on
                 combine_features: false,
                 uncombine_features: false,
             },
-            defaultMode: "draw_polygon",
-            styles: customDrawStyles,
+            defaultMode: "draw_polygon"
         });
 
         mapInstance.addControl(drawControl as unknown as maplibregl.IControl, "top-left");
