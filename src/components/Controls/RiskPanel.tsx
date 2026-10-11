@@ -1,17 +1,58 @@
 import type { RiskCalculateResponse } from "../../types/api";
-import { AlertTriangle, Thermometer, Wind, Leaf, Building2 } from "lucide-react";
+import type { SelectionInfo } from "../../types/gis";
+import { AlertTriangle, Thermometer, Wind, Leaf, Building2, ShieldAlert, Maximize2 } from "lucide-react";
 
 interface RiskPanelProps {
     riskData: RiskCalculateResponse | null;
     loading: boolean;
+    selection?: SelectionInfo | null;
+    onAutoExpand?: () => void;
 }
 
-export default function RiskPanel({ riskData, loading }: RiskPanelProps) {
+export default function RiskPanel({ riskData, loading, selection, onAutoExpand }: RiskPanelProps) {
     if (loading) {
         return (
             <div className="risk-panel loading">
                 <div className="spinner"></div>
-                <span>Analyzing environmental data...</span>
+                <span>Analyzing urban microclimate data...</span>
+            </div>
+        );
+    }
+
+    // When an area is drawn but violates minimum area restriction
+    if (selection && selection.geometry && !selection.isValidArea && selection.areaKm2 > 0) {
+        return (
+            <div className="risk-panel restriction-state">
+                <div className="restriction-panel-header">
+                    <ShieldAlert size={20} className="text-warning" />
+                    <h3>Minimum Area Restriction</h3>
+                </div>
+
+                <div className="restriction-badge-card">
+                    <div className="restriction-score-label">Current Selection</div>
+                    <div className="restriction-score-val">{selection.areaKm2} km²</div>
+                    <div className="restriction-target-pill">
+                        Required: ≥ {selection.minAreaRequiredKm2} km² ({(selection.minAreaRequiredKm2 * 100).toFixed(0)} ha)
+                    </div>
+                </div>
+
+                <div className="restriction-explanation">
+                    <div className="explanation-title">Why is there a minimum area?</div>
+                    <p>
+                        Urban Heat Island (UHI) analysis and canopy deficiency modeling require a contiguous neighborhood block size (≥ {selection.minAreaRequiredKm2} km²) to generate statistically sound thermal, vegetation, and built-up metrics.
+                    </p>
+                </div>
+
+                {onAutoExpand && (
+                    <button
+                        type="button"
+                        className="restriction-action-btn"
+                        onClick={onAutoExpand}
+                    >
+                        <Maximize2 size={16} />
+                        <span>Auto-Expand to {selection.minAreaRequiredKm2} km²</span>
+                    </button>
+                )}
             </div>
         );
     }
