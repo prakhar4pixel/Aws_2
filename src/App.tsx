@@ -1,10 +1,12 @@
 import { useState, useCallback } from "react";
+import type { Feature, Polygon } from "geojson";
 import ClimateMap from "./components/Map/ClimateMap";
 import AreaInfoBadge from "./components/Controls/AreaInfoBadge";
 import DrawToolbar from "./components/Controls/DrawToolbar";
 import Navbar from "./components/Navigation/Navbar";
 import HeatAnalysisDashboard from "./components/Dashboard/HeatAnalysisDashboard";
 import MethodologyModal from "./components/Methodology/MethodologyModal";
+import AwsArchitectureModal from "./components/Navigation/AwsArchitectureModal";
 import type { SelectionInfo } from "./types/gis";
 import type {
   HeatAnalysisResponse,
@@ -43,6 +45,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [minAreaKm2, setMinAreaKm2] = useState<number>(DEFAULT_MIN_AREA_KM2);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
+  const [isAwsModalOpen, setIsAwsModalOpen] = useState(false);
 
   const [layers, setLayers] = useState<LayerVisibilityState>({
     showSelection: true,
@@ -166,6 +169,34 @@ function App() {
     setInitialCenter([lng, lat]);
   };
 
+  const handleLoadSampleArea = useCallback(() => {
+    const sampleFeature: Feature<Polygon> = {
+      type: "Feature",
+      properties: { name: "Central Delhi Urban Core" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [77.205, 28.625],
+          [77.225, 28.625],
+          [77.225, 28.640],
+          [77.205, 28.640],
+          [77.205, 28.625],
+        ]],
+      },
+    };
+    const metrics = calculateAreaMetrics(sampleFeature, minAreaKm2);
+    const updatedSelection: SelectionInfo = {
+      geometry: sampleFeature,
+      areaKm2: metrics.areaKm2,
+      areaHectares: metrics.areaHectares,
+      isValidArea: metrics.isValidArea,
+      minAreaRequiredKm2: minAreaKm2,
+    };
+    setSelection(updatedSelection);
+    setInitialCenter([77.215, 28.632]);
+    runAnalysis(sampleFeature);
+  }, [minAreaKm2, runAnalysis]);
+
   const isSelectionTooSmall = Boolean(
     selection?.geometry && !selection.isValidArea && selection.areaKm2 > 0
   );
@@ -176,6 +207,7 @@ function App() {
       <Navbar
         onLocationSelect={handleLocationSelect}
         onOpenMethodology={() => setIsMethodologyOpen(true)}
+        onOpenAwsModal={() => setIsAwsModalOpen(true)}
         onClearSelection={handleClear}
         hasSelection={Boolean(selection && selection.areaKm2 > 0)}
       />
@@ -226,6 +258,7 @@ function App() {
           selection={selection}
           onAutoExpand={handleAutoExpand}
           onOpenMethodology={() => setIsMethodologyOpen(true)}
+          onLoadSampleArea={handleLoadSampleArea}
         />
       </div>
 
@@ -233,6 +266,13 @@ function App() {
       <MethodologyModal
         isOpen={isMethodologyOpen}
         onClose={() => setIsMethodologyOpen(false)}
+      />
+
+      {/* AWS Cloud Architecture & Integration Modal */}
+      <AwsArchitectureModal
+        isOpen={isAwsModalOpen}
+        onClose={() => setIsAwsModalOpen(false)}
+        onLoadSampleArea={handleLoadSampleArea}
       />
     </main>
   );

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, MapPin, FileText, Globe2, Loader2, RotateCcw } from "lucide-react";
+import { Search, MapPin, FileText, Globe2, Loader2, RotateCcw, Cloud } from "lucide-react";
 
 interface NavbarProps {
   onLocationSelect: (lng: number, lat: number, label: string) => void;
   onOpenMethodology: () => void;
+  onOpenAwsModal?: () => void;
   onClearSelection: () => void;
   hasSelection: boolean;
 }
@@ -18,6 +19,7 @@ interface GeocodeResult {
 export default function Navbar({
   onLocationSelect,
   onOpenMethodology,
+  onOpenAwsModal,
   onClearSelection,
   hasSelection,
 }: NavbarProps) {
@@ -145,6 +147,16 @@ export default function Navbar({
             <span>Clear Area</span>
           </button>
         )}
+
+        <button
+          type="button"
+          className="navbar-btn aws-btn"
+          onClick={onOpenAwsModal}
+          title="Explore AWS Cloud Architecture (Amazon SNS Emergency Dispatcher)"
+        >
+          <Cloud size={15} className="text-amber" />
+          <span>AWS Architecture</span>
+        </button>
 
         <button
           type="button"

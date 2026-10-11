@@ -16,9 +16,13 @@ import {
   Crosshair,
   TrendingDown,
   Info,
+  BellRing,
+  Cloud,
+  Zap,
 } from "lucide-react";
 import type { HeatAnalysisResponse, InterventionResponse, ScenarioAdjustments, ScenarioResponse } from "../../types/api";
 import type { SelectionInfo } from "../../types/gis";
+import AwsSnsAlertPanel from "./AwsSnsAlertPanel";
 
 interface HeatAnalysisDashboardProps {
   analysis: HeatAnalysisResponse | null;
@@ -30,6 +34,7 @@ interface HeatAnalysisDashboardProps {
   selection: SelectionInfo | null;
   onAutoExpand?: () => void;
   onOpenMethodology: () => void;
+  onLoadSampleArea?: () => void;
 }
 
 export default function HeatAnalysisDashboard({
@@ -42,9 +47,10 @@ export default function HeatAnalysisDashboard({
   selection,
   onAutoExpand,
   onOpenMethodology,
+  onLoadSampleArea,
 }: HeatAnalysisDashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    "overview" | "explanation" | "exposure" | "hotspots" | "interventions" | "simulator"
+    "overview" | "explanation" | "exposure" | "hotspots" | "interventions" | "simulator" | "alerts"
   >("overview");
   const [showConfidenceDetails, setShowConfidenceDetails] = useState(false);
 
@@ -98,10 +104,26 @@ export default function HeatAnalysisDashboard({
           <p>
             Use the draw tools on the left toolbar to outline an urban neighborhood, district, or corridor for GIS heat analysis.
           </p>
+
+          {/* Quick Demo CTA */}
+          {onLoadSampleArea && (
+            <div className="empty-sample-cta">
+              <button
+                type="button"
+                className="btn-primary btn-sample-load"
+                onClick={onLoadSampleArea}
+                title="Load Central Delhi urban core to immediately test the analysis and Amazon SNS dispatcher"
+              >
+                <Zap size={15} />
+                <span>Load Sample Area &amp; Test AWS Alerts</span>
+              </button>
+            </div>
+          )}
+
           <div className="empty-steps">
             <div className="step-item">
               <span className="step-num">1</span>
-              <span>Draw Polygon or Rectangle</span>
+              <span>Draw Polygon or Rectangle on Map</span>
             </div>
             <div className="step-item">
               <span className="step-num">2</span>
@@ -111,6 +133,21 @@ export default function HeatAnalysisDashboard({
               <span className="step-num">3</span>
               <span>Detect Hotspots &amp; Plan Interventions</span>
             </div>
+            <div className="step-item highlight-step">
+              <span className="step-num">4</span>
+              <span>Dispatch Emergency Warnings via Amazon SNS (AWS)</span>
+            </div>
+          </div>
+
+          {/* AWS Cloud Integration Banner */}
+          <div className="empty-aws-banner">
+            <div className="empty-aws-header">
+              <Cloud size={15} className="text-amber" />
+              <span>AWS Cloud Integration Active</span>
+            </div>
+            <p>
+              Includes production Amazon SNS Pub/Sub dispatcher with AWS KMS encryption and CloudFormation IaC.
+            </p>
           </div>
         </div>
       </aside>
@@ -227,6 +264,14 @@ export default function HeatAnalysisDashboard({
           <Sliders size={14} />
           <span>Simulator</span>
         </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === "alerts" ? "active" : ""}`}
+          onClick={() => setActiveTab("alerts")}
+        >
+          <BellRing size={14} className={relativeDifference >= 3 ? "text-rose" : "text-amber"} />
+          <span>AWS Alerts</span>
+        </button>
       </nav>
 
       {/* Tab Panels */}
@@ -342,22 +387,6 @@ export default function HeatAnalysisDashboard({
               </div>
             </div>
 
-            {/* Temperature Distribution Histogram */}
-            {analysis.temperatureDistribution && (
-              <div className="dashboard-card">
-                <h4>Spatial Temperature Distribution</h4>
-                <div className="histogram-bars">
-                  {Object.entries(analysis.temperatureDistribution).map(([bin, count]) => (
-                    <div key={bin} className="histogram-col">
-                      <div className="bar-fill" style={{ height: `${Math.min(100, count * 12 + 8)}px` }}>
-                        <span className="col-val">{count}</span>
-                      </div>
-                      <span className="col-label">{bin}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -719,6 +748,13 @@ export default function HeatAnalysisDashboard({
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* TAB 7: AWS SNS HEAT-HEALTH ALERTS */}
+        {activeTab === "alerts" && (
+          <div className="tab-pane active">
+            <AwsSnsAlertPanel analysis={analysis} />
           </div>
         )}
       </div>

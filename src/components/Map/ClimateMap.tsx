@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import DrawRectangle from "mapbox-gl-draw-rectangle-mode";
 import FreehandMode from "mapbox-gl-draw-freehand-mode";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+
+// Explicitly register worker URL so Vite production bundles resolve the MapLibre web worker
+maplibregl.setWorkerUrl(workerUrl);
 import type { Feature, Polygon, MultiPolygon } from "geojson";
 import { calculateAreaMetrics } from "../../utils/geo";
 import type { SelectionInfo } from "../../types/gis";
@@ -72,14 +76,15 @@ const customDrawStyles = [
         "#b45309",
       ],
       "line-width": 3,
-      "line-dasharray": [
-        "case",
-        ["==", ["get", "user_min_area_valid"], "false"],
-        ["literal", [2, 2]],
-        ["==", ["get", "active"], "true"],
-        ["literal", [0.2, 2]],
-        ["literal", [1, 0]],
-      ],
+    },
+  },
+  {
+    id: "gl-draw-polygon-midpoint",
+    type: "circle",
+    filter: ["all", ["==", "$type", "Point"], ["==", "meta", "midpoint"]],
+    paint: {
+      "circle-radius": 4,
+      "circle-color": "#b45309",
     },
   },
   {
@@ -237,6 +242,20 @@ export default function ClimateMap({
       draw_rectangle: actualDrawRectangle,
       draw_freehand: actualFreehandMode,
     };
+
+    // Ensure MapboxDraw compatibility classes are attached to MapLibre elements
+    const canvas = mapInstance.getCanvas();
+    if (canvas && !canvas.classList.contains("mapboxgl-canvas")) {
+      canvas.classList.add("mapboxgl-canvas");
+    }
+    const canvasContainer = mapInstance.getCanvasContainer();
+    if (canvasContainer && !canvasContainer.classList.contains("mapboxgl-canvas-container")) {
+      canvasContainer.classList.add("mapboxgl-canvas-container");
+    }
+    const container = mapInstance.getContainer();
+    if (container && !container.classList.contains("mapboxgl-map")) {
+      container.classList.add("mapboxgl-map");
+    }
 
     const drawControl = new MapboxDraw({
       displayControlsDefault: false,

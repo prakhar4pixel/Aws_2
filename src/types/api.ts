@@ -161,3 +161,38 @@ export interface RiskCalculateResponse {
   risk_category: RiskCategory;
   weights: Record<string, number>;
 }
+
+// ── Amazon SNS Heat Alert Models ─────────────────────────────────
+
+export interface HeatAlertPublishRequest {
+  zoneName: string;
+  areaKm2: number;
+  meanLst: number;
+  maxLst: number;
+  relativeDiff: number;
+  exposureCategory: "Low" | "Moderate" | "High" | "Critical" | string;
+  hotspotCount: number;
+  city?: string;
+  recipientEmail?: string;
+  immediateActions?: string[];
+}
+
+export interface HeatAlertPublishResponse {
+  success: boolean;
+  messageId: string;
+  topicArn: string;
+  subject: string;
+  alertSeverity: "CRITICAL" | "HIGH" | "ADVISORY" | string;
+  timestamp: string;
+  simulated: boolean;
+  statusMessage: string;
+  details: {
+    messageId?: string;
+    region?: string;
+    topic?: string;
+    recipients?: string;
+    deliveryProtocol?: string;
+    messageBodyPreview?: string;
+    [key: string]: any;
+  };
+}
